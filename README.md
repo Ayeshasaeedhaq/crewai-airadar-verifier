@@ -1,4 +1,4 @@
-# CrewAI AI Radar Verifier - Draft v1.1 - CrewAI model fix
+# CrewAI AI Radar Verifier - Draft v1.2 - Manual key only
 
 This project is a text-first claim verifier for AI Radar intelligence briefs. It ingests a `.txt` brief, extracts factual claims with Anthropic Claude, searches for supporting evidence with free DuckDuckGo search, asks Claude to verify each claim against inspected source content, and exports an audit-ready table.
 
@@ -47,7 +47,7 @@ When you run the notebook, it will prompt for your Anthropic key securely:
 Enter Anthropic API key:
 ```
 
-You may still use a local `.env` file if you prefer, but it is not required. No search API key is needed because DuckDuckGo search is free and keyless.
+No `.env` file is required for the notebook workflow. No search API key is needed because DuckDuckGo search is free and keyless.
 
 The notebook uses automatic Claude model fallback. It starts with current Sonnet models, then tries Haiku models if the key does not have access to Sonnet. You can override the first model attempted by setting `ANTHROPIC_MODEL` in `.env`.
 
