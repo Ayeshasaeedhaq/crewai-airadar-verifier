@@ -8,7 +8,7 @@ import re
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from anthropic import Anthropic
+from anthropic import Anthropic, NotFoundError
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 
@@ -22,6 +22,14 @@ CLAIM_TYPES = [
     "executive_strategy",
     "ai_infrastructure",
     "other",
+]
+
+DEFAULT_MODEL_CANDIDATES = [
+    "claude-sonnet-4-20250514",
+    "claude-3-7-sonnet-20250219",
+    "claude-3-5-sonnet-20241022",
+    "claude-3-5-haiku-20241022",
+    "claude-3-haiku-20240307",
 ]
 
 
@@ -122,8 +130,16 @@ class ClaudeClaimExtractor:
         self.api_key = (api_key or os.getenv("ANTHROPIC_API_KEY") or "").strip()
         if not self.api_key:
             raise ValueError("Set ANTHROPIC_API_KEY before running Claude claim extraction.")
-        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
+        self.model = model or os.getenv("ANTHROPIC_MODEL") or DEFAULT_MODEL_CANDIDATES[0]
         self.client = Anthropic(api_key=self.api_key)
+
+    def _model_candidates(self) -> list[str]:
+        candidates = [self.model, *DEFAULT_MODEL_CANDIDATES]
+        deduped = []
+        for candidate in candidates:
+            if candidate and candidate not in deduped:
+                deduped.append(candidate)
+        return deduped
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=12), stop=stop_after_attempt(3))
     def extract(self, raw_text: str, sections: dict[str, str], max_claims: int = 8) -> list[ExtractedClaim]:
@@ -150,12 +166,23 @@ Known section names: {list(sections.keys())}
 Brief:
 {raw_text}
 """
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=2500,
-            temperature=0,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        last_error: Exception | None = None
+        response = None
+        for candidate in self._model_candidates():
+            try:
+                response = self.client.messages.create(
+                    model=candidate,
+                    max_tokens=2500,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                self.model = candidate
+                break
+            except NotFoundError as exc:
+                last_error = exc
+                continue
+        if response is None:
+            tried = ", ".join(self._model_candidates())
+            raise RuntimeError(f"No configured Claude model was available for this API key. Tried: {tried}") from last_error
         text = "\n".join(block.text for block in response.content if getattr(block, "type", "") == "text")
         return _normalize_claims(_extract_json_array(text), max_claims=max_claims)
 

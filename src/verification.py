@@ -9,7 +9,7 @@ from dataclasses import asdict
 from typing import Any
 from urllib.parse import urlparse
 
-from anthropic import Anthropic
+from anthropic import Anthropic, NotFoundError
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from .claim_extraction import ExtractedClaim
@@ -28,6 +28,14 @@ PRIMARY_SOURCE_HINTS = (
     "fda.gov",
     "ftc.gov",
 )
+
+DEFAULT_MODEL_CANDIDATES = [
+    "claude-sonnet-4-20250514",
+    "claude-3-7-sonnet-20250219",
+    "claude-3-5-sonnet-20241022",
+    "claude-3-5-haiku-20241022",
+    "claude-3-haiku-20240307",
+]
 
 
 def source_priority(url: str) -> int:
@@ -72,8 +80,16 @@ class ClaudeVerifier:
         self.api_key = (api_key or os.getenv("ANTHROPIC_API_KEY") or "").strip()
         if not self.api_key:
             raise ValueError("Set ANTHROPIC_API_KEY before running Claude verification.")
-        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
+        self.model = model or os.getenv("ANTHROPIC_MODEL") or DEFAULT_MODEL_CANDIDATES[0]
         self.client = Anthropic(api_key=self.api_key)
+
+    def _model_candidates(self) -> list[str]:
+        candidates = [self.model, *DEFAULT_MODEL_CANDIDATES]
+        deduped = []
+        for candidate in candidates:
+            if candidate and candidate not in deduped:
+                deduped.append(candidate)
+        return deduped
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=12), stop=stop_after_attempt(3))
     def verify(self, claim: ExtractedClaim, evidence_bundle: list[dict[str, str]]) -> dict[str, Any]:
@@ -103,12 +119,23 @@ Claim:
 Inspected source excerpts:
 {json.dumps(evidence_bundle, indent=2)[:18000]}
 """
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=1400,
-            temperature=0,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        last_error: Exception | None = None
+        response = None
+        for candidate in self._model_candidates():
+            try:
+                response = self.client.messages.create(
+                    model=candidate,
+                    max_tokens=1400,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                self.model = candidate
+                break
+            except NotFoundError as exc:
+                last_error = exc
+                continue
+        if response is None:
+            tried = ", ".join(self._model_candidates())
+            raise RuntimeError(f"No configured Claude model was available for this API key. Tried: {tried}") from last_error
         text = "\n".join(block.text for block in response.content if getattr(block, "type", "") == "text")
         return _parse_verification_json(text)
 

@@ -49,7 +49,7 @@ Enter Anthropic API key:
 
 You may still use a local `.env` file if you prefer, but it is not required. No search API key is needed because DuckDuckGo search is free and keyless.
 
-The notebook asks Anthropic which models are available for your key and automatically picks the best available option. You can override that by setting `ANTHROPIC_MODEL` in `.env`.
+The notebook uses automatic Claude model fallback. It starts with current Sonnet models, then tries Haiku models if the key does not have access to Sonnet. You can override the first model attempted by setting `ANTHROPIC_MODEL` in `.env`.
 
 ## Run the Notebook
 
