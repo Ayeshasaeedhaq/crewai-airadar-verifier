@@ -1,4 +1,4 @@
-# CrewAI AI Radar Verifier - Draft v1.2 - Manual key only
+# CrewAI AI Radar Verifier - Draft v1.3 - Prompt fix
 
 This project is a text-first claim verifier for AI Radar intelligence briefs. It ingests a `.txt` brief, extracts factual claims with Anthropic Claude, searches for supporting evidence with free DuckDuckGo search, asks Claude to verify each claim against inspected source content, and exports an audit-ready table.
 
