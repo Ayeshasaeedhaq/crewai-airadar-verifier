@@ -1,0 +1,30 @@
+# AI Radar Brief: Elevance Health
+
+Company: Elevance Health
+Date: 2026-05-28
+Editorial Verdict: Watch closely. Elevance Health continues to frame AI as a practical operating layer for care navigation, claims processing, and member experience, but evidence should be checked against current filings, earnings commentary, and official announcements.
+
+## KPI Metric Cards
+
+- Elevance Health reported 2024 operating revenue above $175 billion.
+- The company served more than 45 million medical members during 2024.
+- Management has described digital and AI-enabled capabilities as part of its strategy to improve consumer experience and administrative efficiency.
+
+## Grouped Findings
+
+### Enterprise AI and Digital Operations
+
+Elevance Health has invested in digital tools and analytics to streamline health plan operations, improve provider collaboration, and support member-facing services.
+
+### Carelon Strategy
+
+Carelon is positioned as Elevance Health's healthcare services brand, with capabilities spanning care delivery, pharmacy, behavioral health, and data-driven services.
+
+### Governance and Risk
+
+The company faces ongoing regulatory scrutiny common to large managed care organizations, including oversight of Medicare Advantage, Medicaid, claims handling, and data privacy practices.
+
+## Update Notes
+
+- Verify membership, revenue, and business-segment claims against the latest annual report or 10-K.
+- Prefer official Elevance Health investor materials, SEC filings, and press releases before using media coverage.

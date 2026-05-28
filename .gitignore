@@ -1,0 +1,15 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+outputs/*
+!outputs/.gitkeep
+*.csv
+*.xlsx
+*.jsonl
+*.log
