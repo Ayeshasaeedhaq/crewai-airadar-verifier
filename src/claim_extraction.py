@@ -25,10 +25,15 @@ CLAIM_TYPES = [
 ]
 
 DEFAULT_MODEL_CANDIDATES = [
+    "claude-opus-4-1-20250805",
+    "claude-opus-4-20250514",
     "claude-sonnet-4-20250514",
     "claude-3-7-sonnet-20250219",
+    "claude-3-7-sonnet-latest",
     "claude-3-5-sonnet-20241022",
+    "claude-3-5-sonnet-latest",
     "claude-3-5-haiku-20241022",
+    "claude-3-5-haiku-latest",
     "claude-3-haiku-20240307",
 ]
 
@@ -135,6 +140,10 @@ class ClaudeClaimExtractor:
 
     def _model_candidates(self) -> list[str]:
         candidates = [self.model, *DEFAULT_MODEL_CANDIDATES]
+        try:
+            candidates.extend(model.id for model in self.client.models.list().data)
+        except Exception:
+            pass
         deduped = []
         for candidate in candidates:
             if candidate and candidate not in deduped:

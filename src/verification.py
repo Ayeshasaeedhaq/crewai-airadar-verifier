@@ -30,10 +30,15 @@ PRIMARY_SOURCE_HINTS = (
 )
 
 DEFAULT_MODEL_CANDIDATES = [
+    "claude-opus-4-1-20250805",
+    "claude-opus-4-20250514",
     "claude-sonnet-4-20250514",
     "claude-3-7-sonnet-20250219",
+    "claude-3-7-sonnet-latest",
     "claude-3-5-sonnet-20241022",
+    "claude-3-5-sonnet-latest",
     "claude-3-5-haiku-20241022",
+    "claude-3-5-haiku-latest",
     "claude-3-haiku-20240307",
 ]
 
@@ -85,6 +90,10 @@ class ClaudeVerifier:
 
     def _model_candidates(self) -> list[str]:
         candidates = [self.model, *DEFAULT_MODEL_CANDIDATES]
+        try:
+            candidates.extend(model.id for model in self.client.models.list().data)
+        except Exception:
+            pass
         deduped = []
         for candidate in candidates:
             if candidate and candidate not in deduped:
@@ -212,7 +221,18 @@ def verify_claims(
                 "source_urls": [],
             }
         else:
-            decision = verifier.verify(claim, evidence)
+            try:
+                decision = verifier.verify(claim, evidence)
+            except Exception as exc:  # noqa: BLE001 - keep the notebook runnable.
+                decision = {
+                    "verification_status": "Not Found",
+                    "confidence_score": 0,
+                    "evidence_notes": (
+                        "Evidence was retrieved, but Claude verification could not complete. "
+                        f"Reason: {exc}"
+                    ),
+                    "source_urls": [item["url"] for item in evidence],
+                }
         selected_urls = decision.get("source_urls") or [item["url"] for item in evidence]
         sources = [{"url": url} for url in selected_urls[:3]]
         verified.append(
