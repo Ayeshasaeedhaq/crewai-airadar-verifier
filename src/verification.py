@@ -69,10 +69,10 @@ class ClaudeVerifier:
     """Use Claude to assess a claim against inspected source content."""
 
     def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
-        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+        self.api_key = (api_key or os.getenv("ANTHROPIC_API_KEY") or "").strip()
         if not self.api_key:
             raise ValueError("Set ANTHROPIC_API_KEY before running Claude verification.")
-        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
         self.client = Anthropic(api_key=self.api_key)
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=12), stop=stop_after_attempt(3))

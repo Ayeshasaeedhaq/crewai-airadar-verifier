@@ -1,6 +1,8 @@
-# CrewAI AI Radar Verifier
+# CrewAI AI Radar Verifier - Draft v1.0
 
 This project is a text-first claim verifier for AI Radar intelligence briefs. It ingests a `.txt` brief, extracts factual claims with Anthropic Claude, searches for supporting evidence with free DuckDuckGo search, asks Claude to verify each claim against inspected source content, and exports an audit-ready table.
+
+Draft version should be visible in the top heading of every notebook or written draft so portfolio reviewers can tell which iteration they are viewing.
 
 Version one intentionally does not implement OCR. The input must already be text.
 
@@ -31,22 +33,23 @@ The reusable Python modules do the operational work, while CrewAI frames the res
 
 ## Setup
 
-Create a virtual environment, install dependencies, and copy the environment template:
+Create a virtual environment and install dependencies:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-Copy-Item .env.example .env
 ```
 
-Fill in `.env`:
+When you run the notebook, it will prompt for your Anthropic key securely:
 
 ```text
-ANTHROPIC_API_KEY=your_anthropic_key
+Enter Anthropic API key:
 ```
 
-No search API key is required. DuckDuckGo search is free and keyless; `ANTHROPIC_API_KEY` is the only secret needed.
+You may still use a local `.env` file if you prefer, but it is not required. No search API key is needed because DuckDuckGo search is free and keyless.
+
+The notebook asks Anthropic which models are available for your key and automatically picks the best available option. You can override that by setting `ANTHROPIC_MODEL` in `.env`.
 
 ## Run the Notebook
 

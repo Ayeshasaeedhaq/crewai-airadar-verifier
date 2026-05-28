@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import requests
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 from markdownify import markdownify as md
 from tenacity import retry, stop_after_attempt, wait_exponential
 
